@@ -33,6 +33,10 @@ Open the dashboard at <http://127.0.0.1:8000> or interactive API docs at <http:/
 
 When adding a book, enter 0–50 copies for each branch, with at least one copy overall.
 
+## Demo video
+
+[Watch the project demo](https://drive.google.com/file/d/1qR3gaKrIb6I3D1jhxOHfcOBDzBHmFLDQ/view?usp=drive_link)
+
 ## Demo logins
 
 - Librarian: `admin@library.com` / `admin12345`
