@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f5f7f4" />
+    <title>City Library</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="/" aria-label="City Library home">
+        <span class="brand-mark" aria-hidden="true">L</span>
+        <span><strong>City Library</strong><small>One place for every story</small></span>
+      </a>
+      <div class="header-right">
+        <span id="sessionLabel" class="session-label">Browsing as guest</span>
+        <button id="logoutButton" class="button button-light button-small hidden" type="button">Log out</button>
+      </div>
+    </header>
+
+    <main class="page-shell">
+      <section class="welcome">
+        <div>
+          <p class="eyebrow">A little more room for curiosity</p>
+          <h1>Your next good read<br /><span>is waiting here.</span></h1>
+          <p class="welcome-copy">Browse the collection, find a branch, and keep track of your books — all in one simple place.</p>
+          <a class="button button-primary" href="#catalog">Explore the catalogue <span aria-hidden="true">↓</span></a>
+        </div>
+        <div class="welcome-art" aria-hidden="true">
+          <div class="art-sun"></div>
+          <div class="art-book art-book-back"></div>
+          <div class="art-book art-book-front"><span>TAKE A<br />LOOK<br /><i>inside</i></span></div>
+          <div class="art-leaf leaf-one"></div>
+          <div class="art-leaf leaf-two"></div>
+        </div>
+      </section>
+
+      <section class="stats-grid" aria-label="Library statistics">
+        <article class="stat-card">
+          <span class="stat-icon icon-green" aria-hidden="true">▤</span>
+          <div><p>Titles in catalogue</p><strong id="bookCount">—</strong></div>
+        </article>
+        <article class="stat-card">
+          <span class="stat-icon icon-yellow" aria-hidden="true">⌂</span>
+          <div><p>Library branches</p><strong id="branchCount">—</strong></div>
+        </article>
+        <article class="stat-card">
+          <span class="stat-icon icon-purple" aria-hidden="true">↗</span>
+          <div><p>Copies available</p><strong id="copyCount">—</strong></div>
+        </article>
+      </section>
+
+      <section id="catalog" class="section-block">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Find something lovely</p>
+            <h2>Browse the catalogue</h2>
+          </div>
+          <label class="search-box">
+            <span class="sr-only">Search books</span>
+            <span aria-hidden="true">⌕</span>
+            <input id="searchInput" type="search" placeholder="Search by title, author or ISBN" />
+          </label>
+        </div>
+        <div id="catalogMessage" class="notice hidden" role="status"></div>
+        <div id="bookList" class="book-grid"></div>
+      </section>
+
+      <section id="memberArea" class="section-block account-section">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Your library account</p>
+            <h2>Member corner</h2>
+          </div>
+          <span class="section-note">Borrow up to 3 books at a time</span>
+        </div>
+
+        <div id="memberGuest" class="account-grid">
+          <article class="surface-card">
+            <h3>Welcome back</h3>
+            <p class="muted">Log in to see your loans and fines.</p>
+            <form id="memberLoginForm" class="form-stack">
+              <label>Email<input name="email" type="email" autocomplete="username" placeholder="you@example.com" required /></label>
+              <label>Password<input name="password" type="password" autocomplete="current-password" placeholder="Your password" required /></label>
+              <button class="button button-primary" type="submit">Member log in</button>
+            </form>
+            <div id="memberLoginMessage" class="form-message" role="status"></div>
+          </article>
+
+          <article class="surface-card">
+            <h3>New to the library?</h3>
+            <p class="muted">Create a member account to get started.</p>
+            <form id="registerForm" class="form-stack">
+              <label>Full name<input name="member_name" type="text" autocomplete="name" placeholder="Your name" required maxlength="100" /></label>
+              <label>Email<input name="email" type="email" autocomplete="email" placeholder="you@example.com" required /></label>
+              <label>Password<input name="password" type="password" autocomplete="new-password" placeholder="At least 8 characters" required minlength="8" /></label>
+              <button class="button button-secondary" type="submit">Create account</button>
+            </form>
+            <div id="registerMessage" class="form-message" role="status"></div>
+          </article>
+        </div>
+
+        <div id="memberDashboard" class="hidden">
+          <div class="member-summary">
+            <div><span class="eyebrow">Signed in as</span><h3 id="memberGreeting">Library member</h3></div>
+            <button id="refreshMemberButton" class="button button-light" type="button">Refresh account</button>
+          </div>
+          <div class="member-data-grid">
+            <article class="surface-card">
+              <div class="card-heading"><h3>My loans</h3><span id="myLoanCount" class="count-badge">0</span></div>
+              <div id="myLoans" class="table-wrap"></div>
+            </article>
+            <article class="surface-card">
+              <div class="card-heading"><h3>My fines</h3><span id="myFineCount" class="count-badge">0</span></div>
+              <div id="myFines" class="table-wrap"></div>
+            </article>
+          </div>
+          <p id="memberAccountMessage" class="form-message" role="status"></p>
+          <p class="payment-note">Fine payment here is a demo: it marks the fine as paid without charging money.</p>
+        </div>
+      </section>
+
+      <section id="librarianArea" class="section-block librarian-section">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">For the library team</p>
+            <h2>Librarian desk</h2>
+          </div>
+          <span class="section-note">Manage books, members and circulation</span>
+        </div>
+
+        <article id="librarianGuest" class="surface-card login-card">
+          <div>
+            <span class="large-icon" aria-hidden="true">▣</span>
+            <h3>Staff sign in</h3>
+            <p class="muted">Log in to check books in and out and view library reports.</p>
+          </div>
+          <form id="librarianLoginForm" class="form-stack login-form">
+            <label>Email<input name="email" type="email" autocomplete="username" placeholder="Staff email" required /></label>
+            <label>Password<input name="password" type="password" autocomplete="current-password" placeholder="Your password" required /></label>
+            <button class="button button-primary" type="submit">Log in to desk</button>
+            <div id="librarianLoginMessage" class="form-message" role="status"></div>
+          </form>
+        </article>
+
+        <div id="librarianDashboard" class="hidden">
+          <div class="desk-tabs" role="tablist" aria-label="Librarian tools">
+            <button class="desk-tab active" type="button" data-tab="circulation" role="tab" aria-selected="true">Circulation</button>
+            <button class="desk-tab" type="button" data-tab="collection" role="tab" aria-selected="false">Books & members</button>
+            <button class="desk-tab" type="button" data-tab="reports" role="tab" aria-selected="false">Reports & fines</button>
+          </div>
+
+          <div id="tab-circulation" class="desk-panel">
+            <div class="desk-grid">
+              <article class="surface-card">
+                <h3>Check out a book</h3>
+                <p class="muted">Choose a member and an available copy.</p>
+                <form id="checkoutForm" class="form-stack">
+                  <label>Member<select name="member_id" id="checkoutMember" required><option value="">Load members first</option></select></label>
+                  <label>Book<select name="book_id" id="checkoutBook" required><option value="">Choose a book</option></select></label>
+                  <label>Available copy<select name="copy_id" id="checkoutCopy" required><option value="">Choose a book first</option></select></label>
+                  <button class="button button-primary" type="submit">Check out copy</button>
+                </form>
+                <div id="checkoutMessage" class="form-message" role="status"></div>
+              </article>
+              <article class="surface-card">
+                <div class="card-heading"><div><h3>All loans</h3><p class="muted">Return a copy when it comes back.</p></div><button id="refreshLoansButton" class="button button-light button-small" type="button">Refresh</button></div>
+                <div id="allLoans" class="table-wrap"></div>
+              </article>
+            </div>
+          </div>
+
+          <div id="tab-collection" class="desk-panel hidden">
+            <div class="desk-grid">
+              <article class="surface-card">
+                <h3>Add a book</h3>
+                <p class="muted">Add a title, its author and copies in each branch.</p>
+                <form id="addBookForm" class="form-stack">
+                  <label>Book title<input name="title" type="text" maxlength="200" required /></label>
+                  <label>ISBN<input name="isbn" type="text" maxlength="20" /></label>
+                  <label>Published year<input name="published_year" type="number" min="1000" max="2100" /></label>
+                  <label>Author names<input name="author_names" type="text" placeholder="Separate names with commas" /></label>
+                  <div>
+                    <span class="eyebrow">Copies at each branch (0 to 50; add at least one copy)</span>
+                    <div id="branchCopies" class="form-stack"></div>
+                  </div>
+                  <button class="button button-primary" type="submit">Add book to catalogue</button>
+                </form>
+                <div id="bookMessage" class="form-message" role="status"></div>
+              </article>
+              <article class="surface-card">
+                <div class="card-heading"><div><h3>Members</h3><p class="muted">Registered library members.</p></div><button id="refreshMembersButton" class="button button-light button-small" type="button">Refresh</button></div>
+                <div id="memberList" class="table-wrap"></div>
+              </article>
+            </div>
+          </div>
+
+          <div id="tab-reports" class="desk-panel hidden">
+            <div class="report-grid">
+              <article class="surface-card">
+                <div class="card-heading"><div><h3>Overdue loans</h3><p class="muted">Books past their due date.</p></div><button id="refreshOverdueButton" class="button button-light button-small" type="button">Refresh</button></div>
+                <div id="overdueList" class="table-wrap"></div>
+              </article>
+              <article class="surface-card">
+                <div class="card-heading"><div><h3>Most borrowed</h3><p class="muted">Popular titles from the collection.</p></div><button id="refreshPopularButton" class="button button-light button-small" type="button">Refresh</button></div>
+                <div id="popularList" class="table-wrap"></div>
+              </article>
+              <article class="surface-card report-wide">
+                <div class="card-heading"><div><h3>Fine register</h3><p class="muted">View fine status for all members.</p></div><button id="refreshFinesButton" class="button button-light button-small" type="button">Refresh</button></div>
+                <div id="allFines" class="table-wrap"></div>
+              </article>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="partnerArea" class="section-block partner-section">
+        <details class="partner-details">
+          <summary><span><span class="eyebrow">Optional integration</span><strong>Partner catalogue access</strong></span><span class="summary-arrow" aria-hidden="true">⌄</span></summary>
+          <p class="muted">Use the partner API key and secret configured for this project to view the catalogue as a partner service.</p>
+          <form id="partnerForm" class="partner-form">
+            <label>API key<input name="api_key" type="password" autocomplete="off" required /></label>
+            <label>API secret<input name="api_secret" type="password" autocomplete="off" required /></label>
+            <button class="button button-secondary" type="submit">Connect to catalogue</button>
+          </form>
+          <div id="partnerMessage" class="form-message" role="status"></div>
+          <div id="partnerResults" class="table-wrap"></div>
+        </details>
+      </section>
+
+      <footer class="site-footer">
+        <span>City Library</span>
+        <span>Borrow kindly. Return on time.</span>
+      </footer>
+    </main>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>

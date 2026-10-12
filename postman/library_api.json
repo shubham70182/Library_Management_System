@@ -1,0 +1,440 @@
+{
+  "info": {
+    "name": "City Library API",
+    "description": "Simple success and failure checks for the library API.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://127.0.0.1:8000" },
+    { "key": "member_token", "value": "" },
+    { "key": "loan_id", "value": "" },
+    { "key": "loan_id_2", "value": "" },
+    { "key": "partner_key", "value": "library-demo-key-123" },
+    { "key": "partner_secret", "value": "library-demo-secret-456" }
+  ],
+  "item": [
+    {
+      "name": "List books (success)",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/api/books"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": ["pm.test('Books are listed', function () { pm.response.to.have.status(200); });"]
+          }
+        }
+      ]
+    },
+    {
+      "name": "List branches (success)",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/api/branches"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": ["pm.test('Branches are listed', function () { pm.response.to.have.status(200); });"]
+          }
+        }
+      ]
+    },
+    {
+      "name": "List copies for sample book (success)",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/api/books/1/copies"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": ["pm.test('Book copies are listed', function () { pm.response.to.have.status(200); });"]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Partner catalogue (success)",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "X-API-Key", "value": "{{partner_key}}" },
+          { "key": "X-API-Secret", "value": "{{partner_secret}}" }
+        ],
+        "url": "{{base_url}}/api/partner/books"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": ["pm.test('Partner can read catalogue', function () { pm.response.to.have.status(200); });"]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Partner catalogue without credentials (failure)",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/api/partner/books"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Missing partner credentials are rejected', function () {",
+              "  pm.response.to.have.status(401);",
+              "  pm.expect(pm.response.json().error.code).to.eql('INVALID_PARTNER_CREDENTIALS');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Librarian login (success)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\":\"admin@library.com\",\"password\":\"admin12345\"}"
+        },
+        "url": "{{base_url}}/api/librarians/login"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": ["pm.test('Librarian logged in', function () { pm.response.to.have.status(200); });"]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Overdue report as librarian (success)",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/api/reports/overdue"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": ["pm.test('Librarian can see overdue loans', function () { pm.response.to.have.status(200); });"]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Check out sample copy 4 (success)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"member_id\":1,\"copy_id\":4}"
+        },
+        "url": "{{base_url}}/api/loans"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Copy is checked out', function () {",
+              "  pm.response.to.have.status(201);",
+              "  pm.collectionVariables.set('loan_id', pm.response.json().loan_id);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Check out the same copy again (failure)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"member_id\":1,\"copy_id\":4}"
+        },
+        "url": "{{base_url}}/api/loans"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": ["pm.test('Unavailable copy is rejected', function () { pm.response.to.have.status(409); });"]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Check out sample copy 5 (success)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"member_id\":1,\"copy_id\":5}"
+        },
+        "url": "{{base_url}}/api/loans"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Second copy is checked out', function () {",
+              "  pm.response.to.have.status(201);",
+              "  pm.collectionVariables.set('loan_id_2', pm.response.json().loan_id);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Member tries to borrow a fourth book (failure)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"member_id\":1,\"copy_id\":6}"
+        },
+        "url": "{{base_url}}/api/loans"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Fourth active loan is rejected', function () {",
+              "  pm.response.to.have.status(409);",
+              "  pm.expect(pm.response.json().error.code).to.eql('LOAN_LIMIT_REACHED');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Return checked-out copy (success)",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/api/loans/{{loan_id}}/return"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": ["pm.test('Copy is returned', function () { pm.response.to.have.status(200); });"]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Return second checked-out copy (success)",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/api/loans/{{loan_id_2}}/return"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": ["pm.test('Second copy is returned', function () { pm.response.to.have.status(200); });"]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Return overdue sample loan and create fine (success)",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/api/loans/2/return"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Late return creates the correct fine', function () {",
+              "  pm.response.to.have.status(200);",
+              "  pm.expect(pm.response.json().fine_amount).to.eql(60);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Member login (success)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\":\"aisha@example.com\",\"password\":\"member12345\"}"
+        },
+        "url": "{{base_url}}/api/members/login"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Member receives a token', function () {",
+              "  pm.response.to.have.status(200);",
+              "  pm.collectionVariables.set('member_token', pm.response.json().access_token);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "View own loans (success)",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{member_token}}" }],
+        "url": "{{base_url}}/api/me/loans"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": ["pm.test('Member can see own loans', function () { pm.response.to.have.status(200); });"]
+          }
+        }
+      ]
+    },
+    {
+      "name": "View own loans without token (failure)",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/api/me/loans"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Missing member token is rejected', function () {",
+              "  pm.response.to.have.status(401);",
+              "  pm.expect(pm.response.json().error.code).to.eql('LOGIN_REQUIRED');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Pay another member's fine (failure)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Authorization", "value": "Bearer {{member_token}}" }],
+        "url": "{{base_url}}/api/fines/1/pay"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": ["pm.test('Cannot pay another member fine', function () { pm.response.to.have.status(404); });"]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Log in as second member (success)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\":\"rahul@example.com\",\"password\":\"member12345\"}"
+        },
+        "url": "{{base_url}}/api/members/login"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Second member receives a token', function () {",
+              "  pm.response.to.have.status(200);",
+              "  pm.collectionVariables.set('member_token', pm.response.json().access_token);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Pay own sample fine (success)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Authorization", "value": "Bearer {{member_token}}" }],
+        "url": "{{base_url}}/api/fines/1/pay"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": ["pm.test('Member can pay own fine', function () { pm.response.to.have.status(200); });"]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Create member with invalid email (failure)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"member_name\":\"Test Member\",\"email\":\"wrong-email\",\"password\":\"password123\"}"
+        },
+        "url": "{{base_url}}/api/members"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": ["pm.test('Invalid data is rejected', function () { pm.response.to.have.status(422); });"]
+          }
+        }
+      ]
+    }
+  ]
+}
